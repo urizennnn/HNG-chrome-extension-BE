@@ -1,41 +1,41 @@
-const express = require('express')
-const app = express()
-const PORT  = process.env.PORT || 5000
-require("dotenv").config();
-require("express-async-errors");
-const cors = require("cors");
-const morgan = require('morgan');
+require('dotenv').config();
+require('express-async-errors');
 
-const xssCLean = require('xss-clean')
-const helmet = require('helmet')
-const rateLimiter = require('express-rate-limit')
-const mongoSanitize = require('express-mongo-sanitize')
-const errorHandlerMiddleware = require("./middleware/error-handler");
-const notFoundMiddleware = require("./middleware/not-found.js");
-const routes = require('./routes/routes')
+const express = require('express');
+const app = express();
+const routes = require('./routes/routes');
+const fileupload = require('express-fileupload');
+const morgan = require('morgan')
+// const cloudinary = require('cloudinary').v2.config({
+//     cloud_name: process.env.CLOUD_NAME,
+//     api_key: process.env.CLOUD_API_KEY,
+//     api_secret: process.env.CLOUD_API_SECRET
+// })
 
-
-
-app.use(
-    cors({
-        origin: "*",
-    })
-);
-app.set('trust proxy', 1)
-app.use(rateLimiter({
-    windowsMs: 15 * 60 * 1000,
-    max: 60,
-}))
-app.use(helmet())
-app.use(xssCLean())
-app.use(mongoSanitize())
+// database
 app.use(express.json());
-app.use(morgan('dev'));
-app.use('/api/HNG',routes)
+app.use(morgan('dev'))
 
+// middleware
+app.use(fileupload());
+// Define routes
+app.use('/api/HNG', routes);
+
+// Error handling middleware
+const notFoundMiddleware = require('./middleware/not-found');
+const errorHandlerMiddleware = require('./middleware/error-handler');
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
-app.listen(PORT,(req,res)=>{
-    console.log(`Server listening on port ${PORT}`)
-})
+const port = process.env.PORT || 3000;
+
+(async () => {
+    try {
+
+        app.listen(port, () =>
+            console.log(`Server is listening on port ${port}...`)
+        );
+    } catch (error) {
+        console.log(error);
+    }
+})();
