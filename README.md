@@ -40,6 +40,11 @@ API Routes
 GET /: A test route that returns a "Hello" message.
 
 POST /api/HNG/uploadfile: Allows users to upload video files. The following rules apply:
+Navigate to Body -> form-data 
+Your body should be as follows
+key->video
+value->file->choose file 
+Hit send
 
 Uploaded files must be videos.
 Uploaded files must not exceed 50MB in size.
