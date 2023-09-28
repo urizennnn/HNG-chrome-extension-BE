@@ -50,7 +50,7 @@ const getVideos = async (req, res) => {
 
         res.status(StatusCodes.OK).json({ videos: videoUrls });
     } catch (error) {
-        throw new CustomAPIErrorHandler('Error reading video directory', StatusCodes.INTERNAL_SERVER_ERROR);
+        throw new CustomAPIErrorHandler(error.message, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 };
 
