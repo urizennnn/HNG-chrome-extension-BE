@@ -1,48 +1,61 @@
 const { CustomAPIErrorHandler } = require('../errors/custom-errors');
 const { StatusCodes } = require('http-status-codes');
-const path = require('path')
+const path = require('path');
+const fs = require('fs').promises;
 
 const sendVideo = async (req, res) => {
-    const video = req.files.video; // Assuming your file input field is named 'video'
-    const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+    const video = req.files.video;
+    const maxSize = 50 * 1024 * 1024;
 
     try {
-        // Check if a file was uploaded
         if (!video) {
             throw new CustomAPIErrorHandler('No video file uploaded', StatusCodes.BAD_REQUEST);
         }
 
-        // Check if the uploaded file size exceeds the allowed maximum
         if (video.size > maxSize) {
             throw new CustomAPIErrorHandler('Please upload a video less than 50MB', StatusCodes.BAD_REQUEST);
         }
 
-        // Check if the uploaded file is of the expected mimetype (e.g., video/mp4)
         if (!video.mimetype.startsWith('video')) {
             throw new CustomAPIErrorHandler('Please upload a video', StatusCodes.BAD_REQUEST);
         }
 
-        // Define the path where you want to save the uploaded video
-        const uploadPath =path.join( __dirname, '../server/uploads/' + video.name); // Adjust the path as needed
+        const uploadPath = path.join(__dirname, '../server/uploads/' + video.name);
 
-        // Use the fs module to save the file to disk
-       await video.mv(uploadPath)
-        // Respond with a success message
+        await video.mv(uploadPath);
         res.status(StatusCodes.OK).json({ message: 'Video uploaded successfully' });
     } catch (error) {
         throw new CustomAPIErrorHandler(error.message, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 };
-const test = (req, res) => {
-    res.send('Hello')
-    res.status(StatusCodes.OK)
-}
-const view = (req, res) => {
 
-}
+const test = (req, res) => {
+    res.send('Hello');
+    res.status(StatusCodes.OK);
+};
+
+const videoUploadPath = path.join(__dirname, '../server/uploads/');
+
+const getVideos = async (req, res) => {
+    try {
+        const files = await fs.readdir(videoUploadPath);
+        const videoFiles = files.filter((file) => {
+            const extname = path.extname(file).toLowerCase();
+            return ['.mp4', '.avi', '.mkv'].includes(extname);
+        });
+
+        const videoUrls = videoFiles.map((file) => {
+            return `/uploads/${file}`;
+        });
+
+        res.status(StatusCodes.OK).json({ videos: videoUrls });
+    } catch (error) {
+        throw new CustomAPIErrorHandler('Error reading video directory', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+};
 
 module.exports = {
     sendVideo,
     test,
-    view
+    getVideos
 };

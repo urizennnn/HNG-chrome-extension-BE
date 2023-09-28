@@ -1,6 +1,6 @@
 require('dotenv').config();
 require('express-async-errors');
-
+const path = require('path')
 const express = require('express');
 const app = express();
 const routes = require('./routes/routes');
@@ -15,6 +15,9 @@ const morgan = require('morgan')
 // database
 app.use(express.json());
 app.use(morgan('dev'))
+// Assuming this is where you serve videos
+app.use(express.static('./server'))
+
 
 // middleware
 app.use(fileupload());
