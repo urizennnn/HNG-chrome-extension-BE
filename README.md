@@ -58,7 +58,6 @@ Set ```enctype``` to multipart/form-data and input name ```video```
     "status": "Failed",
     "message": "File upload failed",
     "message": "No video file uploaded",
-    "message": "Please upload a video less than 50MB",
     "message": "Please upload a video",
 }
 ```
