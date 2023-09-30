@@ -7,16 +7,13 @@ const fs = require('fs').promises
 
 const sendVideo = async (req, res) => {
     const video = req.files.video;
-    const maxSize = 50 * 1024 * 1024; // 50MB
 
     try {
         if (!video) {
             throw new CustomAPIErrorHandler('No video file uploaded', StatusCodes.BAD_REQUEST);
         }
 
-        if (video.size > maxSize) {
-            throw new CustomAPIErrorHandler('Please upload a video less than 50MB', StatusCodes.BAD_REQUEST);
-        }
+       
 
         if (!video.mimetype.startsWith('video')) {
             throw new CustomAPIErrorHandler('Please upload a video', StatusCodes.BAD_REQUEST);
