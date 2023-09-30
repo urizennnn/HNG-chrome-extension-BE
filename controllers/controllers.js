@@ -1,14 +1,13 @@
 const { CustomAPIErrorHandler } = require('../errors/custom-errors');
 const { StatusCodes } = require('http-status-codes');
 const path = require('path');
-const { Deepgram } = require("@deepgram/sdk");
-const { response } = require('express');
-const fs = require('fs').promises;
-const deepgram = new Deepgram(process.env.DEEPGRAM_API_KEY)
+const fs = require('fs').promises
+
+
 
 const sendVideo = async (req, res) => {
     const video = req.files.video;
-    const maxSize = 50 * 1024 * 1024;
+    const maxSize = 50 * 1024 * 1024; // 50MB
 
     try {
         if (!video) {
@@ -28,13 +27,12 @@ const sendVideo = async (req, res) => {
         await video.mv(uploadPath);
         res.status(StatusCodes.OK).json({ message: 'Video uploaded successfully' });
     } catch (error) {
-        throw new CustomAPIErrorHandler(error.message, StatusCodes.INTERNAL_SERVER_ERROR);
+        res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
     }
 };
 
 const test = (req, res) => {
-    res.send('Hello');
-    res.status(StatusCodes.OK);
+    res.status(StatusCodes.OK).send('Hello');
 };
 
 const videoUploadPath = path.join(__dirname, '../server/uploads/');
@@ -48,33 +46,25 @@ const getVideos = async (req, res) => {
         });
 
         const videoUrls = videoFiles.map((file) => {
-            return `/uploads/${file}`;
+            const fileName = path.basename(file); // Get the file name
+            console.log(fileName); // Log the file name
+            return `/uploads/${fileName}`; // Construct the URL with the file name
         });
-        // console.log(req.files.video)
+
         res.status(StatusCodes.OK).json({ videos: videoUrls });
     } catch (error) {
-        throw new CustomAPIErrorHandler(error.message, StatusCodes.INTERNAL_SERVER_ERROR);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
     }
 };
-const transcribe = async (req, res) => {
-    try {
-        const response = await deepgram.transcription.preRecorded({
-            url: "https://chrome-ext-server.onrender.com/" + req.params.filename
-        },
-            { punctuate: true, utterances: true }
-        )
 
-        const transcript = response.toSRT()
-        res.status(StatusCodes.OK).json({ transcript });
-    } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error.message);
-    }
-}
+// const transcribe = async (req, res) => {
+   
+// };
+
 
 
 module.exports = {
     sendVideo,
     test,
     getVideos,
-    transcribe
 };
