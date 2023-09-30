@@ -31,7 +31,7 @@ app.get('/transcribe/:filename',async(req,res)=>{
         const { filename } = req.params
         console.log(filename)
         const response = await deepgram.transcription.preRecorded(
-            { url: "/uploads/" + filename },
+            { url: "https://chrome-ext-server.onrender.com/uploads/" + filename },
             { punctuate: true, utterances: true }
         )
 
