@@ -43,7 +43,7 @@ const sendVideo = async (req, res) => {
         await saveVideoFile(video);
         res.status(StatusCodes.OK).json({ message: 'Video uploaded successfully' });
     } catch (error) {
-        res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'I don tire' });
     }
 };
 
