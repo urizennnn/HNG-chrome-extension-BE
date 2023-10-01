@@ -39,7 +39,7 @@ const getVideos = async (req, res) => {
         const files = await fs.readdir(videoUploadPath);
         const videoFiles = files.filter((file) => {
             const extname = path.extname(file).toLowerCase();
-            return ['.mp4', '.avi', '.mkv'].includes(extname);
+            return ['.mp4', '.avi', '.mkv','webm'].includes(extname);
         });
 
         const videoUrls = videoFiles.map((file) => {
