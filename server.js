@@ -10,24 +10,12 @@ const morgan = require('morgan')
 const { Deepgram } = require("@deepgram/sdk");
 const deepgram = new Deepgram(process.env.DEEPGRAM_API_KEY);
 const cors = require('cors')
-const allowedOrigins = ['https://chrome-ext-server.onrender.com'];
 
-const corsOptions = {
-    origin: function (origin, callback) {
-        if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-};
-
-app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(morgan('dev'))
 app.use(express.static('./server'))
-
+app.use(cors())
 
 // middleware
 app.use(fileupload());
