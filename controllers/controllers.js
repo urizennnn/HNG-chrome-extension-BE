@@ -2,7 +2,7 @@ const { CustomAPIErrorHandler } = require('../errors/custom-errors');
 const { StatusCodes } = require('http-status-codes');
 const path = require('path');
 const fs = require('fs').promises;
-const fileUpload = require('express-fileupload');
+
 
 const videoUploadPath = path.join(__dirname, '../server/uploads/');
 
