@@ -23,8 +23,9 @@ const sendVideo = async (req, res) => {
         // Create a write stream for the uploaded video file
         const writeStream = fs.createWriteStream(uploadPath);
 
-        // Pipe the video buffer into the write stream
-        video.data.pipe(writeStream);
+        // Use the buffer data as a readable stream and pipe it to the write stream
+        const readableStream = require('stream').Readable.from(video.data);
+        readableStream.pipe(writeStream);
 
         // Listen for the 'finish' event to know when the write is complete
         writeStream.on('finish', () => {
