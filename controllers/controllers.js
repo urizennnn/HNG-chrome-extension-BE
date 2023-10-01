@@ -1,27 +1,46 @@
 const { CustomAPIErrorHandler } = require('../errors/custom-errors');
 const { StatusCodes } = require('http-status-codes');
 const path = require('path');
-const fs = require('fs').promises
+const fs = require('fs').promises;
+const fileUpload = require('express-fileupload');
 
+const videoUploadPath = path.join(__dirname, '../server/uploads/');
 
+// Middleware for checking if a video file was uploaded
+const checkVideoUploaded = (video) => {
+    if (!video) {
+        throw new CustomAPIErrorHandler('No video file uploaded', StatusCodes.BAD_REQUEST);
+    }
+    if (!video.mimetype.startsWith('video')) {
+        throw new CustomAPIErrorHandler('Please upload a video', StatusCodes.BAD_REQUEST);
+    }
+};
+
+// Function to save a video file in chunks
+const saveVideoFile = async (video) => {
+    const uploadPath = path.join(videoUploadPath, video.name);
+    const writeStream = fs.createWriteStream(uploadPath);
+
+    await new Promise((resolve, reject) => {
+        video.data.on('data', (chunk) => {
+            writeStream.write(chunk);
+        });
+        video.data.on('end', () => {
+            writeStream.end();
+            resolve();
+        });
+        video.data.on('error', (error) => {
+            writeStream.end();
+            reject(error);
+        });
+    });
+};
 
 const sendVideo = async (req, res) => {
-    const video = req.files.video;
-
     try {
-        if (!video) {
-            throw new CustomAPIErrorHandler('No video file uploaded', StatusCodes.BAD_REQUEST);
-        }
-
-       
-
-        if (!video.mimetype.startsWith('video')) {
-            throw new CustomAPIErrorHandler('Please upload a video', StatusCodes.BAD_REQUEST);
-        }
-
-        const uploadPath = path.join(__dirname, '../server/uploads/' + video.name);
-
-        await video.mv(uploadPath);
+        const video = req.files.video;
+        checkVideoUploaded(video);
+        await saveVideoFile(video);
         res.status(StatusCodes.OK).json({ message: 'Video uploaded successfully' });
     } catch (error) {
         res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
@@ -32,8 +51,6 @@ const test = (req, res) => {
     res.status(StatusCodes.OK).send('Hello');
 };
 
-const videoUploadPath = path.join(__dirname, '../server/uploads/');
-
 const getVideos = async (req, res) => {
     try {
         const files = await fs.readdir(videoUploadPath);
@@ -43,9 +60,9 @@ const getVideos = async (req, res) => {
         });
 
         const videoUrls = videoFiles.map((file) => {
-            const fileName = path.basename(file); // Get the file name
-            console.log(fileName); // Log the file name
-            return `/uploads/${fileName}`; // Construct the URL with the file name
+            const fileName = path.basename(file);
+            console.log(fileName);
+            return `/uploads/${fileName}`;
         });
 
         res.status(StatusCodes.OK).json({ videos: videoUrls });
@@ -53,12 +70,6 @@ const getVideos = async (req, res) => {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
     }
 };
-
-// const transcribe = async (req, res) => {
-   
-// };
-
-
 
 module.exports = {
     sendVideo,
