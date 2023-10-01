@@ -9,6 +9,10 @@ const fileupload = require('express-fileupload');
 const morgan = require('morgan')
 const { Deepgram } = require("@deepgram/sdk");
 const deepgram = new Deepgram(process.env.DEEPGRAM_API_KEY);
+const cors = require('cors')
+
+
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(morgan('dev'))
 app.use(express.static('./server'))
