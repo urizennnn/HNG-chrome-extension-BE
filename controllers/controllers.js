@@ -54,9 +54,11 @@ const test = (req, res) => {
 const getVideos = async (req, res) => {
     try {
         const files = await fs.readdir(videoUploadPath);
+        const allowedExtensions = ['.webm', '.mp4', '.avi', '.mkv'];
+
         const videoFiles = files.filter((file) => {
             const extname = path.extname(file).toLowerCase();
-            return ['.mp4', '.avi', '.mkv',].includes(extname);
+            return allowedExtensions.includes(extname);
         });
 
         const videoUrls = videoFiles.map((file) => {
@@ -70,6 +72,7 @@ const getVideos = async (req, res) => {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
     }
 };
+
 
 module.exports = {
     sendVideo,
