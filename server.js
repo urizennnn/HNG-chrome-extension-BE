@@ -22,7 +22,21 @@ app.get("/api/play/:video", (req, res) => {
     const videoPath = uploadPath + name
     res.sendFile(videoPath)
 })
+app.get('/getvideo',async(req,res)=>{
+    try {
+        const files = await fs.promises.readdir(videoUploadPath);
+        const videoFiles = files.filter((file) => {
+            const extname = path.extname(file).toLowerCase();
+            return ['.mp4', '.avi', '.mkv', '.webm'].includes(extname);
+        });
 
+        const videoUrls = videoFiles.map((file) => `/uploads/${file}`);
+
+        res.status(StatusCodes.OK).json({ videos: videoUrls });
+    } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
+    }
+})
 app.get('/api/create', async (req, res) => {
     id = id + 1
     let writable = ''
